@@ -1,0 +1,81 @@
+import React, { useState, useRef } from 'react';
+
+const ResizableLayout = () => {
+  const [width1, setWidth1] = useState(40); // Default width of the first div in percentage
+  const [width2, setWidth2] = useState(40); // Default width of the second div in percentage
+  const isResizing = useRef(false); // Track whether the user is resizing
+
+  // Handle the mouse down event to start resizing
+  const handleMouseDown = () => {
+    isResizing.current = true;
+  };
+
+  // Handle the mouse move event to resize the divs
+  const handleMouseMove = (event) => {
+    if (isResizing.current) {
+      // Calculate new width for both divs based on mouse movement
+      const newWidth1 = Math.max(10, Math.min((event.clientX / window.innerWidth) * 100, 80));
+      setWidth1(newWidth1);
+      setWidth2(80 - newWidth1); // Maintain the total width at 80%
+    }
+  };
+
+  // Handle the mouse up event to stop resizing
+  const handleMouseUp = () => {
+    isResizing.current = false;
+  };
+
+  return (
+    <div 
+      onMouseMove={handleMouseMove} 
+      onMouseUp={handleMouseUp} 
+      style={{ height: '100vh', display: 'flex', position: 'relative' }}
+    >
+      {/* First Flexible Div */}
+      <div 
+        style={{ 
+          width: `${width1}%`, 
+          height: '100%', 
+          backgroundColor: 'lightblue' 
+        }}
+      >
+        Div 1 - Width: {width1}%
+      </div>
+
+      {/* Dragger/Slider between Div1 and Div2 */}
+      <div 
+        onMouseDown={handleMouseDown}
+        style={{ 
+          width: '10px', 
+          height: '100%', 
+          backgroundColor: 'gray', 
+          cursor: 'ew-resize' 
+        }}
+      />
+
+      {/* Second Flexible Div */}
+      <div 
+        style={{ 
+          width: `${width2}%`, 
+          height: '100%', 
+          backgroundColor: 'lightgreen' 
+        }}
+      >
+        Div 2 - Width: {width2}%
+      </div>
+
+      {/* Fixed Side Menu (Div 3) */}
+      <div 
+        style={{ 
+          width: '20%', 
+          height: '100%', 
+          backgroundColor: 'lightcoral' 
+        }}
+      >
+        Div 3 (Fixed Side Menu) - Width: 20%
+      </div>
+    </div>
+  );
+};
+
+export default ResizableLayout;
