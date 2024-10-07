@@ -176,3 +176,78 @@ const WaterfallChart = () => {
 
 export default WaterfallChart;
 
+
+
+
+
+
+import React from 'react';
+import { Chart, CategoryScale, LinearScale, Title, Tooltip, Legend } from 'chart.js';
+import { WaterfallController, BarElement } from 'chartjs-chart-waterfall';
+import { Chart as ReactChart } from 'react-chartjs-2';
+
+// Register the components needed for the Waterfall chart
+Chart.register(CategoryScale, LinearScale, BarElement, WaterfallController, Title, Tooltip, Legend);
+
+const WaterfallChart = () => {
+  // Data for the Waterfall chart
+  const data = {
+    labels: [
+      'Budget for Income',
+      'F/X Loss',
+      'Price Increase',
+      'New Sales',
+      'F/X Gain',
+      'Loss of Customers',
+      'New Customers',
+      'Actual Income'
+    ],
+    datasets: [
+      {
+        label: 'Waterfall',
+        data: [
+          { y: 2000 }, // Starting point
+          { y: -300 }, // F/X Loss
+          { y: 600 },  // Price Increase
+          { y: 400 },  // New Sales
+          { y: 100 },  // F/X Gain
+          { y: -1000 }, // Loss of Customers
+          { y: 450 },  // New Customers
+          { y: 2250, isSum: true }, // Final total (green bar)
+        ],
+        backgroundColor: (ctx) => {
+          const value = ctx.raw.y;
+          return value >= 0 ? '#4caf50' : '#f44336'; // Green for increase, red for decrease
+        },
+        borderColor: 'black',
+        borderWidth: 1
+      }
+    ]
+  };
+
+  // Configuration options for the chart
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Waterfall Chart',
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+      },
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
+
+  return <ReactChart type="waterfall" data={data} options={options} />;
+};
+
+export default WaterfallChart;
