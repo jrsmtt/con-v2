@@ -1,0 +1,47 @@
+const getChartOptions = (partNum) => {
+  switch (partNum) {
+    case 1:
+      return [
+        { value: 'line', label: 'Stacked Line Chart' },
+        { value: 'bar', label: 'S2S Bar Chart' },
+        { value: 'stacked-bar', label: 'Stacked Bar Chart' },
+        { value: 'stacked-line', label: 'Stacked Line' },
+        { value: 'non-highlighted-crosstab', label: 'Cross Tab' },
+      ];
+    case 0:
+      return [
+        { value: 'line', label: 'Stacked Line Chart' },
+        { value: 'bar', label: 'S2S Bar Chart' },
+      ];
+    default:
+      return [
+        { value: 'non-highlighted-crosstab', label: 'Cross Tab' },
+      ];
+  }
+};
+
+const ChartSelect = ({ partNum, selectedChartType, setSelectedChartType }) => {
+  const chartOptions = getChartOptions(partNum); // Get options based on partNum
+
+  return (
+    <Box sx={{ minWidth: "20px", height: "1px", position: "relative", float: "right", right: "23rem" }}>
+      <FormControl sx={{ float: "left", left: "13rem", top: "1.7rem" }}>
+        <InputLabel id="demo-simple-select-label">Chart</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          label="Chart"
+          value={selectedChartType}
+          onChange={(e) => setSelectedChartType(e.target.value)}
+          sx={{ height: "25px", fontSize: "11px" }}
+        >
+          {chartOptions.map((option) => (
+            <MenuItem sx={{ fontSize: "10px" }} key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
+  );
+};
