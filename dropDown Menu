@@ -45,3 +45,60 @@ const ChartSelect = ({ partNum, selectedChartType, setSelectedChartType }) => {
     </Box>
   );
 };
+
+
+
+
+
+const renderChart = (partNum, selectedChartType, visualizationView, kpiData, dataFreq, xAxisChart, yAxisChart, pivotTableKeys, reportingMonth, metric) => {
+  const chartConfig = {
+    line: (
+      <div className="LineChart">
+        <LineChart 
+          data={visualizationView} 
+          xAxisChart={xAxisChart} 
+          yAxisChart={yAxisChart} 
+          kpiData={kpiData[0]} 
+          dataFreq={dataFreq} 
+        />
+      </div>
+    ),
+    bar: (
+      <div className="BarChart">
+        <BarChart 
+          data={visualizationView} 
+          xAxisChart={xAxisChart} 
+          yAxisChart={yAxisChart} 
+          kpiData={kpiData[0]} 
+          dataFreq={dataFreq} 
+        />
+      </div>
+    ),
+    'stacked-bar': (
+      <div className="StackedChart">
+        <SideBySideBarChart 
+          jsonData={visualizationView} 
+          dimensions={pivotTableKeys?.length === 1 ? pivotTableKeys[0] : undefined} 
+          reportingMonth={reportingMonth} 
+          metric={metric} 
+          xAxisChart={xAxisChart} 
+          yAxisChart={yAxisChart} 
+        />
+      </div>
+    ),
+    'highlighted-crosstab': (
+      <div className="PivotTable">
+        <PivotTable data={visualizationView} />
+      </div>
+    ),
+  };
+
+  // Default fallback if no matching chart type found
+  return chartConfig[selectedChartType] || <div>No Chart Available</div>;
+};
+
+// Example usage in your component
+const ChartRenderer = ({ partNum, selectedChartType, visualizationView, kpiData, dataFreq, xAxisChart, yAxisChart, pivotTableKeys, reportingMonth, metric }) => {
+  return renderChart(partNum, selectedChartType, visualizationView, kpiData, dataFreq, xAxisChart, yAxisChart, pivotTableKeys, reportingMonth, metric);
+};
+
