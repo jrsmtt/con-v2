@@ -269,3 +269,160 @@ const CrossTab = ({ data, kpiList, dimensions }) => {
 export default CrossTab;
 
   
+
+
+
+
+
+
+import React, { useState } from 'react';
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  ToggleButton, ToggleButtonGroup, Radio, RadioGroup, FormControlLabel,
+  Paper, Typography
+} from '@mui/material';
+import { formatNumberWithKMB, calculateYoY, highlightCell } from './utils';
+
+// Define the proper order of months
+const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+const CrossTab = ({ data, kpiList, dimensions }) => {
+  const [dateView, setDateView] = useState('month');  // 'month' or 'year'
+  const [yoyView, setYoyView] = useState('actual');   // 'actual' or 'percentage'
+
+  const handleDateChange = (event) => setDateView(event.target.value);
+  const handleYoyChange = (event, newView) => setYoyView(newView);
+
+  // Native JS: Parse and organize data by month or year
+  const parseDate = (dateString) => new Date(dateString);
+  const getYear = (date) => date.getFullYear();
+  const getMonth = (date) => date.toLocaleString('default', { month: 'long' });  // Full month name
+
+  // Get current and previous year
+  const currentYear = new Date().getFullYear();
+  const previousYear = currentYear - 1;
+
+  // Organize data by year and month for cumulative and non-cumulative views
+  const organizeData = () => {
+    const groupedData = {};
+    const columns = new Set();  // Track columns (months) dynamically
+
+    data.forEach(row => {
+      const date = parseDate(row.yr_mth_appl_dttm);
+      const year = getYear(date);
+      const month = getMonth(date);
+
+      // Add months as columns only for month view
+      if (dateView === 'month' && year === currentYear) {
+        columns.add(month);
+      } else if (dateView === 'year') {
+        columns.add(currentYear);  // Year view: Add the current year as a column
+        columns.add(previousYear);  // Year view: Add the previous year as a column
+      }
+
+      const dimensionKey = dimensions.map(d => row[d] || 'N/A').join('-');
+      if (!groupedData[dimensionKey]) {
+        groupedData[dimensionKey] = {
+          currentYearData: {},
+          previousYearData: {},
+          currentYearCumulative: 0,
+          previousYearCumulative: 0
+        };
+      }
+
+      // Store data month-wise for current and previous year
+      if (year === currentYear) {
+        groupedData[dimensionKey].currentYearData[month] = row.Applications;
+        groupedData[dimensionKey].currentYearCumulative += row.Applications;
+      } else if (year === previousYear) {
+        groupedData[dimensionKey].previousYearData[month] = row.Applications;
+        groupedData[dimensionKey].previousYearCumulative += row.Applications;
+      }
+    });
+
+    return { groupedData, columns: Array.from(columns).sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b)) };
+  };
+
+  const getCrossTabData = () => {
+    const { groupedData, columns } = organizeData();
+    const result = [];
+
+    for (const [dimensionKey, metrics] of Object.entries(groupedData)) {
+      const dimensionValues = dimensionKey.split('-');
+      const row = { dimensionValues, metrics };
+      result.push(row);
+    }
+
+    return { result, columns };
+  };
+
+  const { result: crossTabData, columns } = getCrossTabData();
+
+  return (
+    <TableContainer component={Paper}>
+      {/* Radio buttons for switching between month or year view */}
+      <Typography variant="h6">Select Date View</Typography>
+      <RadioGroup row value={dateView} onChange={handleDateChange}>
+        <FormControlLabel value="month" control={<Radio />} label="Month" />
+        <FormControlLabel value="year" control={<Radio />} label="Year" />
+      </RadioGroup>
+
+      {/* Toggle button for switching between actual values and YoY */}
+      <Typography variant="h6">View Mode</Typography>
+      <ToggleButtonGroup
+        value={yoyView}
+        exclusive
+        onChange={handleYoyChange}
+        aria-label="view mode"
+      >
+        <ToggleButton value="actual" aria-label="Actual">Actual</ToggleButton>
+        <ToggleButton value="percentage" aria-label="Percentage">YoY %</ToggleButton>
+      </ToggleButtonGroup>
+
+      {/* Cross-tab Table */}
+      <Table>
+        <TableHead>
+          <TableRow>
+            {/* Dynamically render columns based on dimensions */}
+            {dimensions.map((dimension, index) => (
+              <TableCell key={index}>{dimension}</TableCell>
+            ))}
+            {/* Dynamically render columns for months in month view or years in year view */}
+            {columns.map((col, index) => (
+              <TableCell key={index}>{dateView === 'month' ? col : `Year ${col}`}</TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {/* Render data rows */}
+          {crossTabData.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {/* Render dimension values dynamically */}
+              {row.dimensionValues.map((value, index) => (
+                <TableCell key={index}>{value}</TableCell>
+              ))}
+              {/* Render cells with values for each month in month view or cumulative in year view */}
+              {columns.map((col, colIndex) => (
+                <TableCell key={colIndex} style={highlightCell(row.metrics[col] || 0)}>
+                  {dateView === 'month' ? (
+                    // Month view: Show YoY if selected, otherwise show actual value
+                    yoyView === 'actual'
+                      ? formatNumberWithKMB(row.metrics.currentYearData[col] || 0)
+                      : calculateYoY(row.metrics.currentYearData[col] || 0, row.metrics.previousYearData[col] || 0)
+                  ) : (
+                    // Year view: Show YoY if selected, otherwise show actual value
+                    yoyView === 'actual'
+                      ? formatNumberWithKMB(col === currentYear ? row.metrics.currentYearCumulative : row.metrics.previousYearCumulative)
+                      : calculateYoY(row.metrics.currentYearCumulative, row.metrics.previousYearCumulative)
+                  )}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
+export default CrossTab;
