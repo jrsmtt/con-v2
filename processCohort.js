@@ -97,3 +97,60 @@ function App() {
 
 export default App;
 
+
+
+.cohort-table-container {
+  margin: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cohort-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.cohort-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.cohort-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.cohort-table tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+.cohort-table tr:hover {
+  background-color: #e6f7ff;
+}
+
+.cohort-table .high-value {
+  background-color: #a6e3a1;
+  font-weight: bold;
+  color: #2d6a4f;
+}
+
+.cohort-table .mid-value {
+  background-color: #f3dd73;
+  font-weight: bold;
+  color: #9c7400;
+}
+
+.cohort-table .low-value {
+  background-color: #f9a3a3;
+  font-weight: bold;
+  color: #9b2226;
+}
+
+
